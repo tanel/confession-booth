@@ -1,5 +1,5 @@
 
-const int coinInt = 1;
+const int coinInt = 0;
 
 volatile float coinsValue = 0.00;
 
