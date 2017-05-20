@@ -2,59 +2,85 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    ofSetWindowShape(kMovieSize, kMovieSize);
+    
 	ofBackground(255,255,255);
 	ofSetVerticalSync(true);
 	paused = true;
 
 	// Uncomment this to show movies with alpha channels
-	fingerMovie.setPixelFormat(OF_PIXELS_RGBA);
+	movie.setPixelFormat(OF_PIXELS_RGBA);
 
-	fingerMovie.load("movies/videoplayback.mp4");
-	fingerMovie.setLoopState(OF_LOOP_NORMAL);
-	fingerMovie.play();
+	movie.load("movies/videoplayback.mp4");
+	movie.setLoopState(OF_LOOP_NORMAL);
+    
+    ofSetLogLevel(OF_LOG_VERBOSE);
+    
+    serial.listDevices();
+    vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+    
+    // this should be set to whatever com port your serial device is connected to.
+    // (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
+    // arduino users check in arduino app....
+    int baud = 9600;
+    serial.setup(0, baud); //open the first device
+    //serial.setup("COM4", baud); // windows example
+    //serial.setup("/dev/tty.usbserial-A4001JEC", baud); // mac osx example
+    //serial.setup("/dev/ttyUSB0", baud); //linux example
+    
+    nBytesRead = 0;
+    readTime = 0;
+    memset(bytesReadString, 0, kBufSize);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    fingerMovie.update();
+    movie.update();
+    
+    if(movie.getIsMovieDone()){
+        movie.firstFrame();
+        paused = true;
+        movie.setPaused(paused);
+    }
+    
+    if(serial.available() > 0) {
+        unsigned char bytesReturned[kBufSize];
+        
+        memset(bytesReadString, 0, kBufSize);
+        memset(bytesReturned, 0, kBufSize);
+
+        nBytesRead = 0;
+        
+        int nRead  = 0;  // a temp variable to keep count per read
+        while( (nRead = serial.readBytes( bytesReturned, kBufSize)) > 0){
+            nBytesRead = nRead;
+        };
+        
+        if (nBytesRead > 0) {
+            if (movie.isPaused()) {
+                paused = false;
+                movie.play();
+            }
+        }
+        
+        memcpy(bytesReadString, bytesReturned, kBufSize);
+        
+        readTime = ofGetElapsedTimef();
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
 	ofSetHexColor(0xFFFFFF);
 
-    fingerMovie.draw(20,20);
-    ofSetHexColor(0x000000);
-    ofPixels & pixels = fingerMovie.getPixels();
-
-    int vidWidth = pixels.getWidth();
-    int vidHeight = pixels.getHeight();
-    int nChannels = pixels.getNumChannels();
+    movie.draw(0,0,kMovieSize,kMovieSize);
     
-    // let's move through the "RGB(A)" char array
-    // using the red pixel to control the size of a circle.
-    for (int i = 4; i < vidWidth; i+=8){
-        for (int j = 4; j < vidHeight; j+=8){
-            unsigned char r = pixels[(j * 320 + i)*nChannels];
-            float val = 1 - ((float)r / 255.0f);
-			ofDrawCircle(400 + i,20+j,10*val);
-        }
-    }
-
-
     ofSetHexColor(0x000000);
-	ofDrawBitmapString("press p to (un)pause",20,320);
-    ofSetHexColor(0x000000);
-
-    ofDrawBitmapString("frame: " + ofToString(fingerMovie.getCurrentFrame()) + "/"+ofToString(fingerMovie.getTotalNumFrames()),20,380);
-    ofDrawBitmapString("duration: " + ofToString(fingerMovie.getPosition()*fingerMovie.getDuration(),2) + "/"+ofToString(fingerMovie.getDuration(),2),20,400);
-    ofDrawBitmapString("speed: " + ofToString(fingerMovie.getSpeed(),2),20,420);
-
-    if(fingerMovie.getIsMovieDone()){
-        ofSetHexColor(0xFF0000);
-        ofDrawBitmapString("end of movie",20,440);
-    }
+	
+    ofDrawBitmapString("p=(un)pause, 0=rewind",20,320);
+    ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),20,340);
+    ofDrawBitmapString("duration: " + ofToString(movie.getPosition()*movie.getDuration(),2) + "/"+ofToString(movie.getDuration(),2),20,360);
+    ofDrawBitmapString("last coin time " + ofToString(readTime, 3), 20, 380);
 }
 
 //--------------------------------------------------------------
@@ -62,10 +88,12 @@ void ofApp::keyPressed  (int key){
     switch(key){
         case 'p':
             paused = !paused;
-            fingerMovie.setPaused(paused);
+            movie.setPaused(paused);
         break;
         case '0':
-            fingerMovie.firstFrame();
+            movie.firstFrame();
+            paused = true;
+            movie.setPaused(paused);
         break;
     }
 }

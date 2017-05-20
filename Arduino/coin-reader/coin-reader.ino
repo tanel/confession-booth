@@ -1,18 +1,14 @@
 
-const int coinInt = 0;
-
-volatile float coinsValue = 0.00;
+const int coinInt = 1;
 
 int coinsChange = 0;
 
 void setup() {
   Serial.begin(9600);
   attachInterrupt(coinInt, coinInserted, RISING);
-  Serial.println("setup done");
 }
 
 void coinInserted() {
-  coinsValue = coinsValue + 2;
   coinsChange = 1;
 }
 
@@ -22,8 +18,7 @@ void loop() {
     // unflag that a coin has been inserted
     coinsChange = 0;
 
-    Serial.print("Credit: $");
-    Serial.println(coinsValue);
+    Serial.println("1");
   }
 
   delay(1000);
