@@ -72,15 +72,13 @@ void ofApp::update(){
 void ofApp::draw(){
 	ofSetHexColor(0xFFFFFF);
     
-    int videoSize = kMovieSize/1.2;
-
-    movie.draw(0, 0, videoSize, videoSize);
+    movie.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight() - 120);
     
     ofSetHexColor(0x000000);
     
-    int textStart = kMovieSize - 80;
+    int textStart = ofGetWindowHeight() - 80;
 	
-    ofDrawBitmapString("<space>=(un)pause, 0-9=jump",
+    ofDrawBitmapString("<space>=(un)pause, 0-9=jump, q=exit",
                        20, textStart+0);
     ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),
                        20, textStart+20);
@@ -91,10 +89,18 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
+void ofApp::windowResized(int width, int height) {
+    
+}
+
+//--------------------------------------------------------------
 void ofApp::keyPressed  (int key){
     switch(key){
         case ' ':
             pause(!paused);
+            break;
+        case 'q':
+            ofExit();
             break;
         case '0':
             movie.setFrame(movie.getTotalNumFrames() * 0.0);
