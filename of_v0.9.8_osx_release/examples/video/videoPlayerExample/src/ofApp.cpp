@@ -44,9 +44,12 @@ void ofApp::setup(){
     bufferCounter	= 0;
     drawCounter		= 0;
     smoothedVol     = 0.0;
-    scaledVol		= 0.0;
+    curVol = 0.0;
     
     soundStream.setup(this, 0, 2, 44100, bufferSize, 4);
+    
+    // Enable/disable experiments
+    alphaExperiment = false;
 }
 
 void ofApp::pause(const bool doPause) {
@@ -93,26 +96,26 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	ofSetHexColor(0xFFFFFF);
-    
+
+    // Display movie
     int displayWidth = ofGetWindowWidth();
     int displayHeight = ofGetWindowHeight() - 120;
-    
     movie.draw(0, 0, displayWidth, displayHeight);
     
-    int alphaPercentage = 10;
+    // Alpha experiment
+    if (alphaExperiment) {
+        int alphaPercentage = 80 - (smoothedVol * 1000);
+        int alpha = alphaPercentage * 255 / 100;
 
-    int alpha = alphaPercentage * 255 / 100;
-    
-    ofEnableAlphaBlending();
-    ofSetColor(0, 0, 0, alpha);
-    ofDrawRectangle(1, 1, displayWidth, displayHeight);
-    ofDisableAlphaBlending();
-    
-    
+        ofEnableAlphaBlending();
+        ofSetColor(0, 0, 0, alpha);
+        ofDrawRectangle(1, 1, displayWidth, displayHeight);
+        ofDisableAlphaBlending();
+    }
+
+    // Debug info
     ofSetHexColor(0x000000);
-    
-    int textStart = ofGetWindowHeight() - 80;
-	
+    int textStart = ofGetWindowHeight() - 100;
     ofDrawBitmapString("<space>=(un)pause, 0-9=jump, q=exit",
                        20, textStart+0);
     ofDrawBitmapString("frame: " + ofToString(movie.getCurrentFrame()) + "/"+ofToString(movie.getTotalNumFrames()),
@@ -121,6 +124,8 @@ void ofApp::draw(){
                        20, textStart+40);
     ofDrawBitmapString("last coin time " + ofToString(startTime, 3),
                        20, textStart+60);
+    ofDrawBitmapString("vol " + ofToString(smoothedVol, 3),
+                       20, textStart+80);
 }
 
 //--------------------------------------------------------------
@@ -167,7 +172,7 @@ void ofApp::keyPressed  (int key){
 
 //--------------------------------------------------------------
 void ofApp::audioIn(float * input, int bufferSize, int nChannels){
-    float curVol = 0.0;
+    curVol = 0.0;
     
     // samples are "interleaved"
     int numCounted = 0;

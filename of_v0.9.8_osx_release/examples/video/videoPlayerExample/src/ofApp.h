@@ -40,7 +40,11 @@ class ofApp : public ofBaseApp{
         int 	drawCounter;
         float smoothedVol;
         float scaledVol;
+        float curVol;
     
         ofSoundStream soundStream;
+    
+        // Experiments
+        bool alphaExperiment;
 };
 
