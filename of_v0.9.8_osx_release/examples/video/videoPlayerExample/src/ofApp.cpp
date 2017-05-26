@@ -77,10 +77,12 @@ void ofApp::draw(){
     
     movie.draw(0, 0, displayWidth, displayHeight);
     
-    int alpha = 80;
+    int alphaPercentage = 10;
+
+    int alpha = alphaPercentage * 255 / 100;
     
     ofEnableAlphaBlending();
-    ofSetColor(255, 0, 0, alpha);
+    ofSetColor(0, 0, 0, alpha);
     ofDrawRectangle(1, 1, displayWidth, displayHeight);
     ofDisableAlphaBlending();
     
