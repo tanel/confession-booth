@@ -15,7 +15,6 @@ class ofApp : public ofBaseApp{
         // User input
         void keyPressed(int key);
         void pause(const bool doPause);
-        void windowResized(int width, int height);
 
         // Video player
 		ofVideoPlayer 		movie;

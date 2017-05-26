@@ -124,11 +124,6 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int width, int height) {
-    
-}
-
-//--------------------------------------------------------------
 void ofApp::keyPressed  (int key){
     switch(key){
         case ' ':
