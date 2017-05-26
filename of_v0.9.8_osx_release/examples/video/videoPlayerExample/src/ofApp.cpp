@@ -72,7 +72,18 @@ void ofApp::update(){
 void ofApp::draw(){
 	ofSetHexColor(0xFFFFFF);
     
-    movie.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight() - 120);
+    int displayWidth = ofGetWindowWidth();
+    int displayHeight = ofGetWindowHeight() - 120;
+    
+    movie.draw(0, 0, displayWidth, displayHeight);
+    
+    int alpha = 80;
+    
+    ofEnableAlphaBlending();
+    ofSetColor(255, 0, 0, alpha);
+    ofDrawRectangle(1, 1, displayWidth, displayHeight);
+    ofDisableAlphaBlending();
+    
     
     ofSetHexColor(0x000000);
     
